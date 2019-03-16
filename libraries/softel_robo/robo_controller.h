@@ -32,7 +32,7 @@ public:
       servos_[i].attach(pins_[i]);
     }
 
-    zero()
+    zero();
   }
 
   void zero() {
@@ -43,7 +43,7 @@ public:
 
   void reset() {
     for (int i = 0; i < NUM_DOF; i++) {
-      move(i, reset_position_[i] - servos_[i].read())
+      move(i, reset_position_[i] - servos_[i].read());
     }
   }
 
