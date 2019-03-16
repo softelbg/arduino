@@ -43,8 +43,13 @@ class RoboArmCamera(BaseCamera):
 
 class RoboArmComm:
     def __init__(self):
-        self.ser = serial.Serial('/dev/tty.???', 9600)
+        self.serial_port = '/dev/cu.usbserial-1430'
+        print(self.serial_port, "connecting...")
+        self.ser = serial.Serial(self.serial_port, 9600)
+        sleep(3)
+        print(self.serial_port, "connected")
         self.n_iter = 0
+        self.reset()
 
     def read(self):
         rpos = self.ser.readline()
@@ -57,19 +62,19 @@ class RoboArmComm:
     def reset(self):
         print("reset")
         self.n_iter = 0
-        self.ser.write("r:0:0\n")
+        self.ser.write("r:0:0".encode())
         p, t = self.read()
         return p, t
 
     def move(self, idx, d):
         print("move", idx, d)
         self.n_iter += 1
-        self.ser.write("m:{}:{}\n".format(idx, d))
+        self.ser.write("m:{}:{}".format(idx, d).encode())
         p, t = self.read()
         return p, t
 
     def position(self):
-        self.ser.write("p:0:0\n")
+        self.ser.write("p:0:0".encode())
         p, t = self.read()
         return p, t
 

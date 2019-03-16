@@ -11,6 +11,8 @@ RoboTarget target(11);
 void setup() {
   Serial.begin(9600);
 
+  pinMode(LED_BUILTIN, OUTPUT);
+
   arm.init();
   target.init();
 }
@@ -65,6 +67,15 @@ void parse_cmdln_test() {
   }
 }
 
+void dbg_blink() {
+  for (int i = 0; i < 3; i++) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(50);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(10);
+  }
+}
+
 void parse_cmdln() {
   if (readString.length() > 0) {
     String cmd = getValue(readString, ':', 0);
@@ -77,6 +88,7 @@ void parse_cmdln() {
       arm.move(servo_idx, val);
     }
 
+    dbg_blink();
     Serial.println(arm.position());
 
     int tval = target.read();
@@ -95,5 +107,5 @@ void loop() {
     delay(2);
   }
 
-  parse_cmdln_test();
+  parse_cmdln();
 }
