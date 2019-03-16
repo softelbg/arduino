@@ -13,6 +13,7 @@
 #endif
 
 #include <Servo.h>
+#include <stdio.h>
 
 #define NUM_DOF 5
 
@@ -57,6 +58,12 @@ public:
     }
   }
 
+  String position() {
+    char buff[64];
+    sprintf(buff, "%d %d %d %d", servos_[0].read(), servos_[1].read(), servos_[2].read(), servos_[3].read());
+    return String(buff);
+  }
+
 private:
   int threshold_dwn_[NUM_DOF] = {40, 80, 30, 10, 0};
   int threshold_up_[NUM_DOF] =  {130, 140, 130, 170, 180};
@@ -70,7 +77,7 @@ private:
 // Simple target, consider some holding of active value...
 class RoboTarget {
 public:
-  RoboTarget(int pin) : pin_(pin) {}
+  explicit RoboTarget(int pin) : pin_(pin) {}
   
   void init() {
     pinMode(pin_, INPUT);
