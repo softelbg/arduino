@@ -7,6 +7,8 @@ from time import sleep
 import serial
 import cv2
 
+DOF = 4
+
 class BaseCamera():
   def __init__(self, idx=0):
     print("Camera {} warming up".format(idx))
@@ -32,14 +34,15 @@ class RoboArmCamera(BaseCamera):
   def __init__(self, idx=0):
     super().__init__(idx)
 
-    self.w = 300
-    self.h = 300
+    ratio = 0.5
+    self.w = int(self.cap.get(3) * ratio)
+    self.h = int(self.cap.get(4) * ratio)
 
     self.clk()
 
   def frame_process(self):
     self.frame_resized = cv2.resize(self.frame, (self.w, self.w), interpolation = cv2.INTER_AREA)
-    cv2.imshow('cam_{}'.format(self.idx), self.frame_resized)
+    #cv2.imshow('cam_{}'.format(self.idx), self.frame_resized)
 
 class RoboArmComm:
     def __init__(self):
@@ -93,10 +96,12 @@ class RoboArmEnv(gym.Env):
 
         self.viewer = None
 
-        self.low = np.array([-5, -5, -5, -5])
-        self.high = np.array([5, 5, 5, 5])
-        self.action_space = spaces.Box(self.low, self.high)
-        self.observation_space = spaces.Box(np.array([0, 0, 0, 0]), np.array([180, 180, 180, 180]))
+        #self.low = np.array([-5, -5, -5, -5])
+        #self.high = np.array([5, 5, 5, 5])
+        #self.action_space = spaces.Box(self.low, self.high)
+        self.action_space = spaces.Discrete(DOF * 2)
+
+        self.observation_space = spaces.Box(low=0, high=255, shape=(200, 200, 3), dtype=np.uint8)
 
         self.seed()
         self.reset()
@@ -105,28 +110,42 @@ class RoboArmEnv(gym.Env):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
+    def _read_cam_img_state(self):
+        img = self.robo_cam.frame_resized
+        print("render img shape", img.shape)
+        return img
+
     def step(self, action):
         # TODO: Tune reward fn...
-        reward = 0.0
+        print("step action", action)
+        reward = -10.0
         position = []
-        for idx, d in enumerate(action):
-            p, t = self.robo_arm.move(idx, int(d))
-            reward += t
-            position = p
+
+        action_idx = int(action / 2)
+        action_sign = int(action % 2)
+        p, t = self.robo_arm.move(action_idx, int( ((-1) ** action_sign) * 5 ))
+        if t > 0: reward = 10
+        position = p
+
+        #for idx, d in enumerate(action):
+        #    p, t = self.robo_arm.move(idx, int(d))
+        #    reward += t
+        #    position = p
 
         done = self.robo_arm.done() and reward > 0
 
-        self.state = position
-        return np.array(self.state), reward, done, {}
+        self.state = self._read_cam_img_state()
+        return self.state, reward, done, {}
 
     def reset(self):
         p, t = self.robo_arm.reset()
-        self.state = np.array(p)
+        self.state = self._read_cam_img_state()
         return self.state
 
     def render(self, mode='human'):
         self.robo_cam.clk()
         img = self.robo_cam.frame_resized
+        print("render img shape", img.shape)
 
         if self.viewer is None:
             from gym.envs.classic_control.rendering import SimpleImageViewer
