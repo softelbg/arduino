@@ -86,6 +86,8 @@ void parse_cmdln() {
       arm.reset();
     } else if (cmd == "m") {
       arm.move(servo_idx, val);
+    } else if (cmd == "z") {
+      arm.zero();
     }
 
     dbg_blink();

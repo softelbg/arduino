@@ -65,6 +65,13 @@ class RoboArmComm:
         print("pos", position_val, "target", target_val)
         return (position_val, target_val)
 
+    def zero(self):
+        print("zero")
+        self.n_iter = 0
+        self.ser.write("z:0:0".encode())
+        p, t = self.read()
+        return p, t
+
     def reset(self):
         print("reset")
         self.n_iter = 0

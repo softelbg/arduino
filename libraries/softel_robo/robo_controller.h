@@ -31,11 +31,19 @@ public:
     for (int i = 0; i < NUM_DOF; i++) {
       servos_[i].attach(pins_[i]);
     }
+
+    zero()
+  }
+
+  void zero() {
+    for (int i = 0; i < NUM_DOF; i++) {
+      servos_[i].write(zero_position_[i]);
+    }
   }
 
   void reset() {
     for (int i = 0; i < NUM_DOF; i++) {
-      servos_[i].write(reset_position_[i]);
+      move(i, reset_position_[i] - servos_[i].read())
     }
   }
 
@@ -65,9 +73,10 @@ public:
   }
 
 private:
-  int threshold_dwn_[NUM_DOF] = {40, 80, 30, 10, 0};
+  int threshold_dwn_[NUM_DOF] = {40, 70, 30, 10, 0};
   int threshold_up_[NUM_DOF] =  {130, 140, 130, 170, 180};
   int reset_position_[NUM_DOF] = {90, 130, 90, 90, 90};
+  int zero_position_[NUM_DOF] = {81, 81, 90, 130, 90};
 
   int pins_[NUM_DOF];
 
