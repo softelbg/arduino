@@ -12,7 +12,7 @@ class BaseCamera():
     print("Camera {} warming up".format(idx))
     self.idx = idx
     self.cap = cv2.VideoCapture(idx)
-    time.sleep(1)
+    sleep(1)
     print("Camera {} ready".format(idx))
 
   def frame_process(self):
@@ -91,13 +91,12 @@ class RoboArmEnv(gym.Env):
         self.robo_arm = RoboArmComm()
         self.robo_cam = RoboArmCamera(0)
 
-        self.low = np.array([-5, -5, -5, -5])
-        self.high = np.array([5, 5, 5, 5])
-
         self.viewer = None
 
-        self.action_space = spaces.Discrete(4)
-        self.observation_space = spaces.Box(self.low, self.high)
+        self.low = np.array([-5, -5, -5, -5])
+        self.high = np.array([5, 5, 5, 5])
+        self.action_space = spaces.Box(self.low, self.high)
+        self.observation_space = spaces.Box(np.array([0, 0, 0, 0]), np.array([180, 180, 180, 180]))
 
         self.seed()
         self.reset()
@@ -107,6 +106,7 @@ class RoboArmEnv(gym.Env):
         return [seed]
 
     def step(self, action):
+        # TODO: Tune reward fn...
         reward = 0.0
         position = []
         for idx, d in enumerate(action):
@@ -114,7 +114,7 @@ class RoboArmEnv(gym.Env):
             reward += t
             position = p
 
-        done = self.robo_arm.done()
+        done = self.robo_arm.done() and reward > 0
 
         self.state = position
         return np.array(self.state), reward, done, {}
