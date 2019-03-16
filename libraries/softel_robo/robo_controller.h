@@ -1,3 +1,17 @@
+/*
+  Softel Labs 2019
+  s.georgiev@softel.bg
+*/
+
+#ifndef __ROBO_CONTROLLER_H__
+#define __ROBO_CONTROLLER_H__
+
+#if (ARDUINO >= 100)
+ #include "Arduino.h"
+#else
+ #include "WProgram.h"
+#endif
+
 #include <Servo.h>
 
 #define NUM_DOF 5
@@ -36,7 +50,7 @@ public:
       v += s;
       if (v < threshold_up_[idx] && v > threshold_dwn_[idx]) {
         servos_[idx].write(v);
-        delay(100);
+        delay(50);
       } else {
         break;
       }
@@ -52,3 +66,22 @@ private:
 
   Servo servos_[NUM_DOF];
 };
+
+// Simple target, consider some holding of active value...
+class RoboTarget {
+public:
+  RoboTarget(int pin) : pin_(pin) {}
+  
+  void init() {
+    pinMode(pin_, INPUT);
+  }
+
+  int read() {
+    return digitalRead(pin_);
+  }
+
+private:
+  int pin_;
+};
+
+#endif
