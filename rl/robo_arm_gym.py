@@ -35,18 +35,21 @@ class RoboArmCamera(BaseCamera):
     super().__init__(idx)
 
     ratio = 0.5
-    self.w = int(self.cap.get(3) * ratio)
-    self.h = int(self.cap.get(4) * ratio)
+    #self.w = int(self.cap.get(3) * ratio)
+    #self.h = int(self.cap.get(4) * ratio)
+    self.w = 300
+    self.h = 300
 
     self.clk()
 
   def frame_process(self):
     self.frame_resized = cv2.resize(self.frame, (self.w, self.w), interpolation = cv2.INTER_AREA)
-    #cv2.imshow('cam_{}'.format(self.idx), self.frame_resized)
+    cv2.imshow('cam_roboarm_{}'.format(self.idx), self.frame)
+    if cv2.waitKey(1) & 0xFF == ord('q'): return
 
 class RoboArmComm:
     def __init__(self):
-        self.serial_port = '/dev/cu.usbserial-1430'
+        self.serial_port = '/dev/cu.usbserial-1440'
         print(self.serial_port, "connecting...")
         self.ser = serial.Serial(self.serial_port, 9600)
         sleep(3)
@@ -119,14 +122,13 @@ class RoboArmEnv(gym.Env):
         # TODO: Tune reward fn...
         print("step action", action)
         reward = -10.0
-        position = []
 
         action_idx = int(action / 2)
         action_sign = int(action % 2)
         p, t = self.robo_arm.move(action_idx, int( ((-1) ** action_sign) * 5 ))
         if t > 0: reward = 10
-        position = p
 
+        #position = []
         #for idx, d in enumerate(action):
         #    p, t = self.robo_arm.move(idx, int(d))
         #    reward += t
@@ -146,12 +148,6 @@ class RoboArmEnv(gym.Env):
         self.robo_cam.clk()
         img = self.robo_cam.frame_resized
         print("render img shape", img.shape)
-
-        if self.viewer is None:
-            from gym.envs.classic_control.rendering import SimpleImageViewer
-            self.viewer = SimpleImageViewer()
-            self.viewer.imshow(img)
-
         return img
 
     def close(self):

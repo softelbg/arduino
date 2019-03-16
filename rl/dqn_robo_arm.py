@@ -19,7 +19,7 @@ from rl.callbacks import FileLogger, ModelIntervalCheckpoint
 from robo_arm_gym import *
 env = RoboArmEnv()
 
-INPUT_SHAPE = (200, 200)
+INPUT_SHAPE = (300, 300)
 WINDOW_LENGTH = 4
 
 
