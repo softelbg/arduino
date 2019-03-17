@@ -19,7 +19,7 @@ from rl.callbacks import FileLogger, ModelIntervalCheckpoint
 from robo_arm_gym import *
 env = RoboArmEnv()
 
-INPUT_SHAPE = (300, 300)
+INPUT_SHAPE = (128, 128)
 WINDOW_LENGTH = 4
 
 
@@ -85,6 +85,8 @@ dqn.compile(Adam(lr=.00025), metrics=['mae'])
 
 weights_filename = 'dqn_robo_arm_weights.h5f'
 dqn.fit(env, nb_steps=1750000, visualize=True)
-#dqn.save_weights(weights_filename, overwrite=True)
+dqn.save_weights(weights_filename, overwrite=True)
+
+
 #dqn.test(env, nb_episodes=10, visualize=False)
 

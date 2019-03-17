@@ -37,8 +37,9 @@ class RoboArmCamera(BaseCamera):
     ratio = 0.5
     #self.w = int(self.cap.get(3) * ratio)
     #self.h = int(self.cap.get(4) * ratio)
-    self.w = 300
-    self.h = 300
+
+    self.w = 128
+    self.h = 128
 
     self.clk()
 
@@ -49,7 +50,7 @@ class RoboArmCamera(BaseCamera):
 
 class RoboArmComm:
     def __init__(self):
-        self.serial_port = '/dev/cu.usbserial-1440'
+        self.serial_port = '/dev/ttyUSB0'
         print(self.serial_port, "connecting...")
         self.ser = serial.Serial(self.serial_port, 9600)
         sleep(3)
@@ -102,7 +103,7 @@ class RoboArmEnv(gym.Env):
 
     def __init__(self):
         self.robo_arm = RoboArmComm()
-        self.robo_cam = RoboArmCamera(0)
+        self.robo_cam = RoboArmCamera(1)
 
         self.viewer = None
 
@@ -141,7 +142,9 @@ class RoboArmEnv(gym.Env):
         #    reward += t
         #    position = p
 
-        done = self.robo_arm.done() and reward > 0
+        done = self.robo_arm.done() or reward > 0
+
+        print("reward", reward, "done", done)
 
         self.state = self._read_cam_img_state()
         return self.state, reward, done, {}
