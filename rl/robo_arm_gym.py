@@ -1,3 +1,4 @@
+from PIL import Image
 import math
 import gym
 from gym import spaces
@@ -38,19 +39,22 @@ class RoboArmCamera(BaseCamera):
     #self.w = int(self.cap.get(3) * ratio)
     #self.h = int(self.cap.get(4) * ratio)
 
-    self.w = 128
-    self.h = 128
+    self.w = 600
+    self.h = 600
 
     self.clk()
 
   def frame_process(self):
-    self.frame_resized = cv2.resize(self.frame, (self.w, self.w), interpolation = cv2.INTER_AREA)
-    cv2.imshow('cam_roboarm_{}'.format(self.idx), self.frame)
+    #self.frame_resized = cv2.resize(self.frame, (self.w, self.w), interpolation = cv2.INTER_AREA)
+    img = Image.fromarray(self.frame)
+    self.frame_resized = img.resize((self.w, self.h)).convert('L')
+    cv2.imshow('cam_roboarm_{}'.format(self.idx), np.array(self.frame_resized))
     if cv2.waitKey(1) & 0xFF == ord('q'): return
 
 class RoboArmComm:
     def __init__(self):
         self.serial_port = '/dev/ttyUSB0'
+        self.serial_port = '/dev/cu.usbserial-1410'
         print(self.serial_port, "connecting...")
         self.ser = serial.Serial(self.serial_port, 9600)
         sleep(3)
@@ -103,7 +107,7 @@ class RoboArmEnv(gym.Env):
 
     def __init__(self):
         self.robo_arm = RoboArmComm()
-        self.robo_cam = RoboArmCamera(1)
+        self.robo_cam = RoboArmCamera(0)
 
         self.viewer = None
 
@@ -123,7 +127,6 @@ class RoboArmEnv(gym.Env):
 
     def _read_cam_img_state(self):
         img = self.robo_cam.frame_resized
-        print("render img shape", img.shape)
         return img
 
     def step(self, action):
@@ -133,7 +136,7 @@ class RoboArmEnv(gym.Env):
 
         action_idx = int(action / 2)
         action_sign = int(action % 2)
-        p, t = self.robo_arm.move(action_idx, int( ((-1) ** action_sign) * 5 ))
+        p, t = self.robo_arm.move(action_idx, int( ((-1) ** action_sign) * 10 ))
         if t > 0: reward = 10
 
         #position = []
@@ -157,7 +160,6 @@ class RoboArmEnv(gym.Env):
     def render(self, mode='human'):
         self.robo_cam.clk()
         img = self.robo_cam.frame_resized
-        print("render img shape", img.shape)
         return img
 
     def close(self):
