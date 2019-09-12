@@ -15,10 +15,8 @@
 #include <Servo.h>
 #include <stdio.h>
 
-#define NUM_DOF 5
+#define NUM_DOF 6
 
-// TODO: Currently 5DOF fixed size robo arm
-// TODO: Make config...
 class RoboArmController {
 public:
   RoboArmController() {
@@ -41,25 +39,25 @@ public:
     }
   }
 
-  void reset() {
+  void reset(int move_delay) {
     for (int i = 0; i < NUM_DOF; i++) {
-      move(i, reset_position_[i] - servos_[i].read());
+      move(i, reset_position_[i] - servos_[i].read(), move_delay);
     }
   }
 
-  void move(int idx, int d) {
+  void move(int idx, int move_distance, int move_delay) {
     // TODO: check for sign()
     int s = 1;
-    if (d < 0) {
+    if (move_distance < 0) {
       s = -1;
     }
 
-    for (int i = 0; i < abs(d); i++) {
+    for (int i = 0; i < abs(move_distance); i++) {
       int v = servos_[idx].read();
       v += s;
       if (v < threshold_up_[idx] && v > threshold_dwn_[idx]) {
         servos_[idx].write(v);
-        delay(50);
+        delay(move_delay);
       } else {
         break;
       }
@@ -68,15 +66,17 @@ public:
 
   String position() {
     char buff[64];
-    sprintf(buff, "%d %d %d %d", servos_[0].read(), servos_[1].read(), servos_[2].read(), servos_[3].read());
+    sprintf(buff, "%d %d %d %d %d %d", // TODO: Make it dynamic
+            servos_[0].read(), servos_[1].read(), servos_[2].read(),
+            servos_[3].read(), servos_[4].read(), servos_[5].read());
     return String(buff);
   }
 
 private:
-  int threshold_dwn_[NUM_DOF] = {40, 70, 30, 10, 0};
-  int threshold_up_[NUM_DOF] =  {130, 140, 130, 170, 180};
-  int reset_position_[NUM_DOF] = {90, 130, 90, 90, 90};
-  int zero_position_[NUM_DOF] = {81, 81, 90, 130, 90};
+  int threshold_dwn_[NUM_DOF] = {0, 0, 0, 0, 0, 0};
+  int threshold_up_[NUM_DOF] =  {180, 180, 180, 180, 180, 180};
+  int reset_position_[NUM_DOF] = {90, 90, 90, 90, 90, 90};
+  int zero_position_[NUM_DOF] = {90, 90, 90, 90, 90, 90};
 
   int pins_[NUM_DOF];
 

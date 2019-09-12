@@ -60,7 +60,6 @@ class RoboArmComm:
         sleep(3)
         print(self.serial_port, "connected")
         self.n_iter = 0
-        self.reset()
 
     def read(self):
         rpos = self.ser.readline()
@@ -80,14 +79,14 @@ class RoboArmComm:
     def reset(self):
         print("reset")
         self.n_iter = 0
-        self.ser.write("r:0:0".encode())
+        self.ser.write("r:0:0:50".encode())
         p, t = self.read()
         return p, t
 
     def move(self, idx, d):
         print("move", idx, d)
         self.n_iter += 1
-        self.ser.write("m:{}:{}".format(idx, d).encode())
+        self.ser.write("m:{}:{}:30".format(idx, d).encode())
         p, t = self.read()
         return p, t
 
@@ -96,8 +95,14 @@ class RoboArmComm:
         p, t = self.read()
         return p, t
 
+
+class RoboArm(RoboArmComm):
+    def __init__(self):
+        self.reset()
+
     def done(self):
         return self.n_iter > 300
+
 
 class RoboArmEnv(gym.Env):
     metadata = {
@@ -106,7 +111,7 @@ class RoboArmEnv(gym.Env):
     }
 
     def __init__(self):
-        self.robo_arm = RoboArmComm()
+        self.robo_arm = RoboArm()
         self.robo_cam = RoboArmCamera(0)
 
         self.viewer = None

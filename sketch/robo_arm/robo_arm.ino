@@ -37,24 +37,25 @@ String getValue(String data, char separator, int index)
 
 void parse_cmdln_test() {
   if (readString.length() > 0) {
-    Serial.println(readString);
+    // Serial.println(readString);
 
     String cmd = getValue(readString, ':', 0);
     int servo_idx = getValue(readString, ':', 1).toInt();
     int val = getValue(readString, ':', 2).toInt();
 
-    Serial.print("cmd ");
-    Serial.print(cmd);
-    Serial.print(" servo_idx ");
-    Serial.print(servo_idx);
-    Serial.print(" val ");
-    Serial.println(val);
+    // Serial.print("cmd ");
+    // Serial.print(cmd);
+    // Serial.print(" servo_idx ");
+    // Serial.print(servo_idx);
+    // Serial.print(" val ");
+    // Serial.println(val);
 
     if (cmd == "r") {
-      Serial.println("reset");
-      arm.reset();
+      int move_delay = getValue(readString, ':', 3).toInt();
+      arm.reset(move_delay);
     } else if (cmd == "m") {
-      arm.move(servo_idx, val);
+      int move_delay = getValue(readString, ':', 3).toInt();
+      arm.move(servo_idx, val, move_delay);
     }
 
     Serial.println(arm.position());
