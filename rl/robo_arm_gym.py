@@ -52,9 +52,11 @@ class RoboArmCamera(BaseCamera):
     if cv2.waitKey(1) & 0xFF == ord('q'): return
 
 class RoboArmComm:
-    def __init__(self):
-        self.serial_port = '/dev/ttyUSB0'
-        self.serial_port = '/dev/cu.usbserial-1410'
+    def __init__(self, serial_port='/dev/ttyACM0'):
+        self.serial_port = serial_port
+        #self.serial_port = '/dev/ttyUSB0'
+        #self.serial_port = '/dev/cu.usbserial-1410'
+        #self.serial_port = '/dev/ttyACM0'
         print(self.serial_port, "connecting...")
         self.ser = serial.Serial(self.serial_port, 9600)
         sleep(3)
