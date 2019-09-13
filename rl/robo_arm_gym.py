@@ -59,7 +59,7 @@ class RoboArmCamera(BaseCamera):
     if cv2.waitKey(1) & 0xFF == ord('q'): return
 
 class RoboArmComm:
-    def __init__(self, serial_port='/dev/ttyACM0'):
+    def __init__(self, serial_port):
         self.serial_port = serial_port
         #self.serial_port = '/dev/ttyUSB0'
         #self.serial_port = '/dev/cu.usbserial-1410'
@@ -92,10 +92,10 @@ class RoboArmComm:
         p, t = self.read()
         return p, t
 
-    def move(self, idx, d):
-        print("move", idx, d)
+    def move(self, idx, move_distance, move_delay=50):
+        print("move", idx, move_distance)
         self.n_iter += 1
-        self.ser.write("m:{}:{}:30".format(idx, d).encode())
+        self.ser.write("m:{}:{}:{}".format(idx, move_distance, move_delay).encode())
         p, t = self.read()
         return p, t
 
@@ -106,7 +106,8 @@ class RoboArmComm:
 
 
 class RoboArm(RoboArmComm):
-    def __init__(self):
+    def __init__(self, serial_port):
+        super().__init__(serial_port)
         self.reset()
 
     def done(self):
@@ -120,7 +121,7 @@ class RoboArmEnv(gym.Env):
     }
 
     def __init__(self):
-        self.robo_arm = RoboArm()
+        self.robo_arm = RoboArm(serial_port='/dev/ttyACM0')
         self.robo_cam = RoboArmCamera(0)
 
         self.viewer = None
