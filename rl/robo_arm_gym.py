@@ -35,7 +35,7 @@ class RoboArmCamera(BaseCamera):
   def __init__(self, idx=0):
     super().__init__(idx)
 
-    ratio = 0.5
+    #ratio = 0.5
     #self.w = int(self.cap.get(3) * ratio)
     #self.h = int(self.cap.get(4) * ratio)
 
@@ -131,6 +131,7 @@ class RoboArmEnv(gym.Env):
         return [seed]
 
     def _read_cam_img_state(self):
+        self.robo_cam.clk()
         img = self.robo_cam.frame_resized
         return img
 
@@ -163,9 +164,7 @@ class RoboArmEnv(gym.Env):
         return self.state
 
     def render(self, mode='human'):
-        self.robo_cam.clk()
-        img = self.robo_cam.frame_resized
-        return img
+        return self._read_cam_img_state()
 
     def close(self):
         if self.viewer:
