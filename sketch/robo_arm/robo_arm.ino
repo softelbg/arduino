@@ -84,9 +84,11 @@ void parse_cmdln() {
     int val = getValue(readString, ':', 2).toInt();
 
     if (cmd == "r") {
-      arm.reset();
+      int move_delay = getValue(readString, ':', 3).toInt();
+      arm.reset(move_delay);
     } else if (cmd == "m") {
-      arm.move(servo_idx, val);
+      int move_delay = getValue(readString, ':', 3).toInt();
+      arm.move(servo_idx, val, move_delay);
     } else if (cmd == "z") {
       arm.zero();
     }
