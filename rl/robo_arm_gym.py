@@ -13,6 +13,7 @@ DOF = 4
 class BaseCamera():
   def __init__(self, idx=0):
     print("Camera {} warming up".format(idx))
+    self.clock_num = 0
     self.idx = idx
     self.cap = cv2.VideoCapture(idx)
     sleep(1)
@@ -22,6 +23,7 @@ class BaseCamera():
     pass 
 
   def clk(self):
+    self.clock_num += 1
     self.ret, self.frame = self.cap.read()
     if self.ret:
       self.frame_process()
@@ -48,6 +50,11 @@ class RoboArmCamera(BaseCamera):
     #self.frame_resized = cv2.resize(self.frame, (self.w, self.w), interpolation = cv2.INTER_AREA)
     img = Image.fromarray(self.frame)
     self.frame_resized = img.resize((self.w, self.h)).convert('L')
+
+    # Save frame
+    if self.clock_num % 10 == 0:
+      cv2.imwrite("frame_{}_{}.jpg".format(self.idx, self.clock_num), self.frame_resized)
+
     cv2.imshow('cam_roboarm_{}'.format(self.idx), np.array(self.frame_resized))
     if cv2.waitKey(1) & 0xFF == ord('q'): return
 
